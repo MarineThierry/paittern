@@ -2,6 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib.patches as patches
+import cv2
+
+from tensorflow_docs.vis import embed
+
 
 # Some modules to display an animation using imageio.
 import imageio
@@ -27,7 +31,7 @@ KEYPOINT_DICT = {
     'right_knee': 14,
     'left_ankle': 15,
     'right_ankle': 16
-}
+    }
 
 # Maps bones to a matplotlib color name.
 KEYPOINT_EDGE_INDS_TO_COLOR = {
@@ -49,7 +53,7 @@ KEYPOINT_EDGE_INDS_TO_COLOR = {
     (13, 15): 'm',
     (12, 14): 'c',
     (14, 16): 'c'
-}
+    }
 
 def _keypoints_and_edges_for_display(keypoints_with_scores,
                                      height,
@@ -78,15 +82,12 @@ def _keypoints_and_edges_for_display(keypoints_with_scores,
         kpts_x = keypoints_with_scores[0, idx, :, 1]
         kpts_y = keypoints_with_scores[0, idx, :, 0]
         kpts_scores = keypoints_with_scores[0, idx, :, 2]
-        kpts_absolute_xy = np.stack(
-        [width * np.array(kpts_x), height * np.array(kpts_y)], axis=-1)
-        kpts_above_thresh_absolute = kpts_absolute_xy[
-        kpts_scores > keypoint_threshold, :]
+        kpts_absolute_xy = np.stack([width * np.array(kpts_x), height * np.array(kpts_y)], axis=-1)
+        kpts_above_thresh_absolute = kpts_absolute_xy[kpts_scores > keypoint_threshold, :]
         keypoints_all.append(kpts_above_thresh_absolute)
 
         for edge_pair, color in KEYPOINT_EDGE_INDS_TO_COLOR.items():
-              if (kpts_scores[edge_pair[0]] > keypoint_threshold and
-              kpts_scores[edge_pair[1]] > keypoint_threshold):
+            if (kpts_scores[edge_pair[0]] > keypoint_threshold and kpts_scores[edge_pair[1]] > keypoint_threshold):
                 x_start = kpts_absolute_xy[edge_pair[0], 0]
                 y_start = kpts_absolute_xy[edge_pair[0], 1]
                 x_end = kpts_absolute_xy[edge_pair[1], 0]
@@ -127,8 +128,11 @@ def draw_prediction_on_image(
     A numpy array with shape [out_height, out_width, channel] representing the
     image overlaid with keypoint predictions. """
     height, width, channel = image.shape
+    print(f'image shape: {image.shape}')
     aspect_ratio = float(width) / height
+    print(f'aspect ratio :{aspect_ratio}')
     fig, ax = plt.subplots(figsize=(12 * aspect_ratio, 12))
+    print(f'fig : {fig}' )
     # To remove the huge white borders
     fig.tight_layout(pad=0)
     ax.margins(0)
@@ -145,6 +149,7 @@ def draw_prediction_on_image(
     (keypoint_locs, keypoint_edges,
     edge_colors) = _keypoints_and_edges_for_display(
        keypoints_with_scores, height, width)
+    print(f'keypoint_locs.shape :{keypoint_locs.shape}')
 
     line_segments.set_segments(keypoint_edges)
     line_segments.set_color(edge_colors)
@@ -165,8 +170,10 @@ def draw_prediction_on_image(
 
     fig.canvas.draw()
     image_from_plot = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    image_from_plot = image_from_plot.reshape(
-      fig.canvas.get_width_height()[::-1] + (3,))
+    print(f'fig.canvas {fig.canvas}')
+    print(len(image_from_plot))
+    print(fig.canvas.get_width_height()[::-1])
+    # image_from_plot = image_from_plot.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     plt.close(fig)
     if output_image_height is not None:
         output_image_width = int(output_image_height / height * width)
@@ -174,6 +181,8 @@ def draw_prediction_on_image(
             image_from_plot, dsize=(output_image_width, output_image_height),
              interpolation=cv2.INTER_CUBIC)
     return image_from_plot
+
+
 
 def np_to_gif(images, fps): # reuse this function in the package to switch iamge file list to gif
     """Converts image sequence (4D numpy array) to gif."""

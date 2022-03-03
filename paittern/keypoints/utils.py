@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import matplotlib.patches as patches
 import cv2
-
 from tensorflow_docs.vis import embed
 
 
@@ -30,8 +29,7 @@ KEYPOINT_DICT = {
     'left_knee': 13,
     'right_knee': 14,
     'left_ankle': 15,
-    'right_ankle': 16
-    }
+    'right_ankle': 16}
 
 # Maps bones to a matplotlib color name.
 KEYPOINT_EDGE_INDS_TO_COLOR = {
@@ -86,8 +84,7 @@ def _keypoints_and_edges_for_display(keypoints_with_scores,height,width,keypoint
         keypoints_all.append(kpts_above_thresh_absolute)
 
         for edge_pair, color in KEYPOINT_EDGE_INDS_TO_COLOR.items():
-              if (kpts_scores[edge_pair[0]] > keypoint_threshold and
-              kpts_scores[edge_pair[1]] > keypoint_threshold):
+              if (kpts_scores[edge_pair[0]] > keypoint_threshold and kpts_scores[edge_pair[1]] > keypoint_threshold):
                   x_start = kpts_absolute_xy[edge_pair[0], 0]
                   y_start = kpts_absolute_xy[edge_pair[0], 1]
                   x_end = kpts_absolute_xy[edge_pair[1], 0]
@@ -111,8 +108,7 @@ def _keypoints_and_edges_for_display(keypoints_with_scores,height,width,keypoint
 
 
 
-def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, close_figure=False,
-    output_image_height=None):
+def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, close_figure=False, output_image_height=None):
     """Draws the keypoint predictions on image.
 
   Args:

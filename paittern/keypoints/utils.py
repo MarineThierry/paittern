@@ -55,10 +55,7 @@ KEYPOINT_EDGE_INDS_TO_COLOR = {
     (14, 16): 'c'
     }
 
-def _keypoints_and_edges_for_display(keypoints_with_scores,
-                                     height,
-                                     width,
-                                     keypoint_threshold=0.11):
+def _keypoints_and_edges_for_display(keypoints_with_scores,height,width,keypoint_threshold=0.11):
     """Returns high confidence keypoints and edges for visualization.
 
   Args:
@@ -82,19 +79,22 @@ def _keypoints_and_edges_for_display(keypoints_with_scores,
         kpts_x = keypoints_with_scores[0, idx, :, 1]
         kpts_y = keypoints_with_scores[0, idx, :, 0]
         kpts_scores = keypoints_with_scores[0, idx, :, 2]
-        kpts_absolute_xy = np.stack([width * np.array(kpts_x), height * np.array(kpts_y)], axis=-1)
-        kpts_above_thresh_absolute = kpts_absolute_xy[kpts_scores > keypoint_threshold, :]
+        kpts_absolute_xy = np.stack(
+        [width * np.array(kpts_x), height * np.array(kpts_y)], axis=-1)
+        kpts_above_thresh_absolute = kpts_absolute_xy[
+        kpts_scores > keypoint_threshold, :]
         keypoints_all.append(kpts_above_thresh_absolute)
 
         for edge_pair, color in KEYPOINT_EDGE_INDS_TO_COLOR.items():
-            if (kpts_scores[edge_pair[0]] > keypoint_threshold and kpts_scores[edge_pair[1]] > keypoint_threshold):
-                x_start = kpts_absolute_xy[edge_pair[0], 0]
-                y_start = kpts_absolute_xy[edge_pair[0], 1]
-                x_end = kpts_absolute_xy[edge_pair[1], 0]
-                y_end = kpts_absolute_xy[edge_pair[1], 1]
-                line_seg = np.array([[x_start, y_start], [x_end, y_end]])
-                keypoint_edges_all.append(line_seg)
-                edge_colors.append(color)
+              if (kpts_scores[edge_pair[0]] > keypoint_threshold and
+              kpts_scores[edge_pair[1]] > keypoint_threshold):
+                  x_start = kpts_absolute_xy[edge_pair[0], 0]
+                  y_start = kpts_absolute_xy[edge_pair[0], 1]
+                  x_end = kpts_absolute_xy[edge_pair[1], 0]
+                  y_end = kpts_absolute_xy[edge_pair[1], 1]
+                  line_seg = np.array([[x_start, y_start], [x_end, y_end]])
+                  keypoint_edges_all.append(line_seg)
+                  edge_colors.append(color)
     if keypoints_all:
         keypoints_xy = np.concatenate(keypoints_all, axis=0)
     else:
@@ -104,11 +104,14 @@ def _keypoints_and_edges_for_display(keypoints_with_scores,
         edges_xy = np.stack(keypoint_edges_all, axis=0)
     else:
         edges_xy = np.zeros((0, 2, 2))
+
+    print(f'keypoints_xy.shape{keypoints_xy.shape}')
+    print(f'edges_xy.shape{edges_xy.shape}')
     return keypoints_xy, edges_xy, edge_colors
 
 
-def draw_prediction_on_image(
-    image, keypoints_with_scores, crop_region=None, close_figure=False,
+
+def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, close_figure=False,
     output_image_height=None):
     """Draws the keypoint predictions on image.
 
@@ -130,9 +133,13 @@ def draw_prediction_on_image(
     height, width, channel = image.shape
     print(f'image shape: {image.shape}')
     aspect_ratio = float(width) / height
-    print(f'aspect ratio :{aspect_ratio}')
+
+    # breakpoint()
     fig, ax = plt.subplots(figsize=(12 * aspect_ratio, 12))
+    print(f'plt.subplot:{fig, ax }')
+    # breakpoint()
     print(f'fig : {fig}' )
+    print(f'keypoint shape : {keypoints_with_scores.shape}')
     # To remove the huge white borders
     fig.tight_layout(pad=0)
     ax.margins(0)
@@ -146,11 +153,12 @@ def draw_prediction_on_image(
     # Turn off tick labels
     scat = ax.scatter([], [], s=60, color='#FF1493', zorder=3)
 
-    (keypoint_locs, keypoint_edges,
-    edge_colors) = _keypoints_and_edges_for_display(
-       keypoints_with_scores, height, width)
-    print(f'keypoint_locs.shape :{keypoint_locs.shape}')
-
+    (keypoint_locs, keypoint_edges,edge_colors) =\
+        _keypoints_and_edges_for_display( keypoints_with_scores, height, width)
+    print(f'kp_edges shape : {keypoint_edges.shape}')
+    print(f'edge_colors:{edge_colors}')
+    print(f'edge_colors_shape:{edge_colors.shape}')
+    print(f'keypoint_locs_shape:{keypoint_locs.shape}')
     line_segments.set_segments(keypoint_edges)
     line_segments.set_color(edge_colors)
     if keypoint_edges.shape[0]:
@@ -170,16 +178,16 @@ def draw_prediction_on_image(
 
     fig.canvas.draw()
     image_from_plot = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+    print(image_from_plot.shape)
     print(f'fig.canvas {fig.canvas}')
     print(len(image_from_plot))
     print(fig.canvas.get_width_height()[::-1])
-    # image_from_plot = image_from_plot.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    # breakpoint()
+    image_from_plot = image_from_plot.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     plt.close(fig)
     if output_image_height is not None:
         output_image_width = int(output_image_height / height * width)
-        image_from_plot = cv2.resize(
-            image_from_plot, dsize=(output_image_width, output_image_height),
-             interpolation=cv2.INTER_CUBIC)
+        image_from_plot = cv2.resize(image_from_plot, dsize=(output_image_width, output_image_height),interpolation=cv2.INTER_CUBIC)
     return image_from_plot
 
 

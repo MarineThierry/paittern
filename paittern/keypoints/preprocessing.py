@@ -32,6 +32,7 @@ def init_crop_region(image_height, image_width):
     'width': box_width
     }
 
+
 def torso_visible(keypoints):
     """Checks whether there are enough torso keypoints.
 
@@ -70,8 +71,8 @@ def determine_torso_and_body_range(keypoints, target_keypoints, center_y, center
     for joint in KEYPOINT_DICT.keys():
         if keypoints[0, 0, KEYPOINT_DICT[joint], 2] < MIN_CROP_KEYPOINT_SCORE:
               continue
-        dist_y = abs(center_y - target_keypoints[joint][0]);
-        dist_x = abs(center_x - target_keypoints[joint][1]);
+        dist_y = abs(center_y - target_keypoints[joint][0])
+        dist_x = abs(center_x - target_keypoints[joint][1])
         if dist_y > max_body_yrange:
               max_body_yrange = dist_y
 
@@ -80,9 +81,7 @@ def determine_torso_and_body_range(keypoints, target_keypoints, center_y, center
 
     return [max_torso_yrange, max_torso_xrange, max_body_yrange, max_body_xrange]
 
-def determine_crop_region(
-      keypoints, image_height,
-      image_width):
+def determine_crop_region(keypoints, image_height,image_width):
     """Determines the region to crop the image for the model to run inference on.
 
       The algorithm uses the detected joints from the previous frame to estimate
@@ -101,9 +100,9 @@ def determine_crop_region(
 
     if torso_visible(keypoints):
         center_y = (target_keypoints['left_hip'][0] +
-                    target_keypoints['right_hip'][0]) / 2;
+                    target_keypoints['right_hip'][0]) / 2
         center_x = (target_keypoints['left_hip'][1] +
-                    target_keypoints['right_hip'][1]) / 2;
+                    target_keypoints['right_hip'][1]) / 2
 
         (max_torso_yrange, max_torso_xrange,max_body_yrange, max_body_xrange) = \
         determine_torso_and_body_range(keypoints, target_keypoints, center_y, center_x)
@@ -115,14 +114,14 @@ def determine_crop_region(
         tmp = np.array(
             [center_x, image_width - center_x, center_y, image_height - center_y])
         crop_length_half = np.amin(
-            [crop_length_half, np.amax(tmp)]);
+            [crop_length_half, np.amax(tmp)])
 
-        crop_corner = [center_y - crop_length_half, center_x - crop_length_half];
+        crop_corner = [center_y - crop_length_half, center_x - crop_length_half]
 
         if crop_length_half > max(image_width, image_height) / 2:
               return init_crop_region(image_height, image_width)
         else:
-              crop_length = crop_length_half * 2;
+              crop_length = crop_length_half * 2
         return {
             'y_min': crop_corner[0] / image_height,
             'x_min': crop_corner[1] / image_width,

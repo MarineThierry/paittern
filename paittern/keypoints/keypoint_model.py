@@ -1,8 +1,11 @@
+from email.mime import image
 from preprocessing import *
 import tensorflow_hub as hub
 from utils import draw_prediction_on_image,progress,np_to_gif
 from video_gif import video_to_gif
 from PIL import Image
+from tensorflow.io import read_file
+from tensorflow.image import decode_gif
 
 model_name = "movenet_lightning"
 
@@ -68,37 +71,34 @@ def run_inference(movenet, image, crop_region, crop_size):
 def run_model_gif(image):
         # Load the input image.
     num_frames, image_height, image_width, _ = image.shape
-    print(image.shape)
-    print(f'input_size{input_size}')
+    print(f'image shape :{image.shape}')
     crop_region = init_crop_region(image_height, image_width)
     keypoints_sequence = []
     output_images = []
 
 # code to run the model on each image
     for frame_idx in range(num_frames):
-        keypoints_with_scores = run_inference(
-            movenet, image[frame_idx, :, :, :], crop_region,
+        keypoints_with_scores = run_inference(movenet, image[frame_idx, :, :, :], crop_region,\
             crop_size=[input_size, input_size]) # run model for image
         print(image[frame_idx, :, :, :].shape)
-        output_images.append(draw_prediction_on_image(
-            image[frame_idx, :, :, :].numpy().astype(np.int32),\
-            keypoints_with_scores, crop_region=None,\
-            close_figure=True, output_image_height=300)) # add image to image sequence
+        # output_images.append(draw_prediction_on_image(image[frame_idx, :, :, :].numpy().astype(np.int32),\keypoints_with_scores, crop_region=None,close_figure=True, output_image_height=300)) # add image to image sequence
 
         keypoints_sequence.append(keypoints_with_scores)
         crop_region = determine_crop_region(keypoints_with_scores, image_height, image_width)
 
-    output_keypoints = np.array(keypoints_sequence).reshape((num_frames,17,3))
-    return output_keypoints, output_images
+
+    return keypoints_sequence #, output_images
 
 
 if __name__ == '__main__':
-    image = video_to_gif('../../raw_data/input_video/test_keypoint_v1.mov',frameRate = 0.5)
-    #save as variables keypoints of gif and resulting images w/keypoints
 
-    output_keypoints, output_images = run_model_gif(image)
-    print(output_images)
+    gif = video_to_gif('../raw_data/input_video/test_keypoint_v1.mov')
+
+    keypoints_sequence= run_model_gif(gif)
+    output_keypoints = np.array(keypoints_sequence).reshape((gif.shape[0],17,3))
+    # print(output_images)
     print(output_keypoints)
-    output = np.stack(output_images, axis=0)
+    print(output_keypoints.shape)
+    # output = np.stack(output_images, axis=0)
 
-    np_to_gif(output, fps=10)
+    # np_to_gif(output, fps=10)

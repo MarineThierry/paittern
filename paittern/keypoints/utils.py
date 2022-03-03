@@ -1,5 +1,7 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
+
 from matplotlib.collections import LineCollection
 import matplotlib.patches as patches
 import cv2
@@ -129,13 +131,17 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
     height, width, channel = image.shape
     print(f'image shape: {image.shape}')
     aspect_ratio = float(width) / height
+    print(f'aspectratio : {aspect_ratio}')
 
     # breakpoint()
+    # print(f'params default : {plt.rcParams}')
+    # new_size = plt.rcParams["figure.figsize"] = (6, 4)
+    # new_dpi = plt.rcParams["figure.dpi"] = 72
     fig, ax = plt.subplots(figsize=(12 * aspect_ratio, 12))
     print(f'plt.subplot:{fig, ax }')
     # breakpoint()
     print(f'fig : {fig}' )
-    print(f'keypoint shape : {keypoints_with_scores.shape}')
+
     # To remove the huge white borders
     fig.tight_layout(pad=0)
     ax.margins(0)
@@ -151,9 +157,9 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
 
     (keypoint_locs, keypoint_edges,edge_colors) =\
         _keypoints_and_edges_for_display( keypoints_with_scores, height, width)
-    print(f'kp_edges shape : {keypoint_edges.shape}')
+
     print(f'edge_colors:{edge_colors}')
-    print(f'edge_colors_shape:{edge_colors.shape}')
+
     print(f'keypoint_locs_shape:{keypoint_locs.shape}')
     line_segments.set_segments(keypoint_edges)
     line_segments.set_color(edge_colors)
@@ -175,9 +181,9 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
     fig.canvas.draw()
     image_from_plot = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
     print(image_from_plot.shape)
-    print(f'fig.canvas {fig.canvas}')
+
     print(len(image_from_plot))
-    print(fig.canvas.get_width_height()[::-1])
+    print(fig.canvas.get_width_height()[::-1]) # ok
     # breakpoint()
     image_from_plot = image_from_plot.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     plt.close(fig)

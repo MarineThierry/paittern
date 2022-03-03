@@ -81,24 +81,24 @@ def run_model_gif(image):
         keypoints_with_scores = run_inference(movenet, image[frame_idx, :, :, :], crop_region,\
             crop_size=[input_size, input_size]) # run model for image
         print(image[frame_idx, :, :, :].shape)
-        # output_images.append(draw_prediction_on_image(image[frame_idx, :, :, :].numpy().astype(np.int32),\keypoints_with_scores, crop_region=None,close_figure=True, output_image_height=300)) # add image to image sequence
+        output_images.append(draw_prediction_on_image(image[frame_idx, :, :, :].numpy().astype(np.int32),keypoints_with_scores, crop_region=None,close_figure=True, output_image_height=300)) # add image to image sequence
 
         keypoints_sequence.append(keypoints_with_scores)
         crop_region = determine_crop_region(keypoints_with_scores, image_height, image_width)
 
 
-    return keypoints_sequence #, output_images
+    return keypoints_sequence , output_images
 
 
 if __name__ == '__main__':
 
     gif = video_to_gif('../raw_data/input_video/test_keypoint_v1.mov')
 
-    keypoints_sequence= run_model_gif(gif)
+    keypoints_sequence, output_images= run_model_gif(gif)
     output_keypoints = np.array(keypoints_sequence).reshape((gif.shape[0],17,3))
-    # print(output_images)
+    print(output_images)
     print(output_keypoints)
     print(output_keypoints.shape)
-    # output = np.stack(output_images, axis=0)
+    output = np.stack(output_images, axis=0)
 
     # np_to_gif(output, fps=10)

@@ -61,15 +61,13 @@ def video_to_gif(
     for i in imgs:
         new_frame = Image.open(i)
         frames.append(new_frame)
-    # Save into a GIF file that loops forever - résoudre
 
     # Check whether the specified
     # path exists or not
     if not os.path.exists(path_gif_output):
         Path(path_gif_output).mkdir()
 
-    frames[0].save(f'{path_gif_output}{gif_name}.gif', format='GIF',append_images=frames[1:],
-                   save_all=True,duration=300, loop=0)
+    frames[0].save(f'{path_gif_output}{gif_name}.gif', format='GIF',append_images=frames[1:],save_all=True,duration=300, loop=0)
 
 
 
@@ -79,4 +77,4 @@ def video_to_gif(
     return gif
 
 #test
-# video_to_gif('../../raw_data/input_video/test_keypoint_v1.mov')
+# video_to_gif('../../raw_data/input_video/IMG_1525.MOV')

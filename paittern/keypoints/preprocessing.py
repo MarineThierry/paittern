@@ -1,5 +1,5 @@
 import tensorflow as tf
-from utils import KEYPOINT_DICT
+from paittern.keypoints.utils import KEYPOINT_DICT
 import numpy as np
 
 # Confidence score to determine whether a keypoint prediction is reliable.

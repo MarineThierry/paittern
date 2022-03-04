@@ -9,13 +9,14 @@
 </head>
 <body>
     hello world
-    <div id="container">
+    <div id="container" style="width: 450px">
 
     </div>
 
     <script type="module">
     import Aaron from 'https://cdn.skypack.dev/@freesewing/aaron';
     import theme from 'https://cdn.skypack.dev/@freesewing/plugin-theme';
+    import svgAttr from 'https://cdn.skypack.dev/@freesewing/plugin-svgattr';
 
     const svg = new Aaron({ 
         sa: 10, // Seam allowance
@@ -32,11 +33,12 @@
         waistToHips: 139,
         }
     })
-    .use(theme) // Load theme plugin
+    .use(theme)
+    .use(svgAttr, {width: "100%"})
     .draft() // Draft the pattern
     .render()
 
     document.getElementById('container').innerHTML = svg
-    </script>
+  </script>
 </body>
 </html>

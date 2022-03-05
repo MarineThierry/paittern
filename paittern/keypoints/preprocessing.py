@@ -5,6 +5,7 @@ import numpy as np
 # Confidence score to determine whether a keypoint prediction is reliable.
 MIN_CROP_KEYPOINT_SCORE = 0.2
 
+
 def init_crop_region(image_height, image_width):
     """Defines the default crop region.
 

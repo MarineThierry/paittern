@@ -1,14 +1,13 @@
-from glob import glob
 from google.cloud import storage
 import numpy as np
 import cv2
 import tensorflow as tf
-from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger, ReduceLROnPlateau, EarlyStopping, TensorBoard
+from tensorflow import keras
+from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.metrics import Recall, Precision
-from model import deeplabv3_plus
-from metrics import dice_loss, dice_coef, iou
-import joblib
+from tensorflow.keras.metrics import MeanIoU
+from paittern.contouring.contouring_unet import my_unet
+import os
 
 # project id - replace with your GCP project id
 PROJECT_ID='wagon-bootcamp-336718'
@@ -33,28 +32,24 @@ def get_data(objet, bucket_name):
 
     return data
 
-def load_data(data, nb, bucket_name):
+def load_data(data, nb, bucket_name, dim):
     bucket = storage.Client().get_bucket(bucket_name)
     my_list = []
     for name in data[:nb]:
         blob = bucket.blob(name)
         obj = np.array(
         cv2.imdecode(
-            np.asarray(bytearray(blob.download_as_string()), dtype=np.uint8), 3
+            np.asarray(bytearray(blob.download_as_string()), dtype=np.uint8), dim
         ))
         my_list.append(obj)
     return np.array(my_list)
     
-def read_image(path):
-    path = path.decode()
-    x = cv2.imread(path, cv2.IMREAD_COLOR)
+def read_image(x):
     x = x/255.0
     x = x.astype(np.float32)
     return x
 
-def read_mask(path):
-    path = path.decode()
-    x = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+def read_mask(x):
     x = x.astype(np.float32)
     x = np.expand_dims(x, axis=-1)
     return x
@@ -77,53 +72,92 @@ def tf_dataset(X, Y, batch=2):
     dataset = dataset.prefetch(10)
     return dataset
 
-if __name__ == "__main__":
-    print("Chargement des données")
-    X_train = get_data('image', BUCKET_NAME)
-    Y_train = get_data('mask', BUCKET_NAME) 
-    X_train = load_data(X_train, 20, BUCKET_NAME)
-    y_train = load_data(Y_train, 20, BUCKET_NAME)
-    
-    print("Création d'un validation set")
-    X_val = [X_train[-4:]]
-    y_val = [y_train[-4:]]
-    
-    X_train = [X_train[:-4]]
-    y_train = [y_train[:-4]]
-    
-    """ Hyperparameters """
-    print("Assignation des hyper-paramètres")
-    batch_size = 2
-    lr = 1e-4
-    num_epochs = 20
-    
-    """ Datasets """
-    print("Création d'un dataset train et d'un ataset val")
-    train_dataset = tf_dataset(X_train, y_train, batch=batch_size)
-    valid_dataset = tf_dataset(X_val, y_val, batch=batch_size)
-    
-    """ Model """
+STORAGE_LOCATION = 'models/contouring/contouring'
+
+def upload_model_to_gcp(model_name):
+    client = storage.Client()
+    bucket = client.bucket(BUCKET_NAME)
+    # image log
+    print('uploading image_log to gcp')
+    blob = bucket.blob(f'{STORAGE_LOCATION}/{model_name}.pickle')
+    blob.upload_from_filename(f'./image_logs/{model_name}-img_log.pickle')
+    # model
+    print('uploading model to gcp')
+    current_wd = os.getcwd()
+    for root, directories, files in os.walk('./saved_models'):
+        for name in files:
+            full_name = os.path.join(root.replace(current_wd,""), name)
+            print('uploading :',full_name)
+            blob = bucket.blob(f'{STORAGE_LOCATION}/{full_name.strip("./saved_models/")}')
+            blob.upload_from_filename(f'{full_name}')
+    print('upload finished\n')
+    print('all done')
+
+
+def save_model(model, model_name):
+    """method that saves the model into a .joblib file and uploads it on Google Storage /models folder
+    HINTS : use joblib library and google-cloud-storage"""
+
+    # saving the trained model to disk is mandatory to then beeing able to upload it to storage
+    # Implement here
+    model.save('contouring')
+    print("saved contouring locally")
+
+    # Implement here
+    upload_model_to_gcp(model_name)
+    print(f"uploaded contouring.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
+
+
+if __name__ == "__main__":    
+    # Model
     print("Création du modèle")
-    model = deeplabv3_plus((H, W, 3))
-    print("Modèle en cours de compilation")
-    model.compile(loss=dice_loss, optimizer=Adam(lr), metrics=[Recall(), Precision()])
+    model = my_unet(3, (512,512,3))
+    #model.summary()
+    #print("Création metrics")
+    my_iou = MeanIoU(name = "my_iou", num_classes = 2)
     
     print("Création des callbacks")
     callbacks = [
-        ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=5, min_lr=1e-7, verbose=1),
-        TensorBoard(),
-        EarlyStopping(monitor='val_loss', patience=20, restore_best_weights=False),
+        EarlyStopping(monitor='val_my_iou', patience=5, restore_best_weights=True),
     ]
+    # Hyperparameters 
+    print("Assignation des hyper-paramètres")
+    batch_size = 16
+    lr = 0.0001
+    num_epochs = 20
+    
+    print("Modèle en cours de compilation")
+    model.compile(loss="binary_crossentropy", optimizer=Adam(lr), metrics = my_iou)
+    
+    
+    print("Chargement des données")
+    X_train = get_data('image', BUCKET_NAME)
+    Y_train = get_data('mask', BUCKET_NAME) 
+    print("get_data réalisé")
+    n = 1000
+    X_train = load_data(X_train, n, BUCKET_NAME, 3)
+    y_train = load_data(Y_train, n, BUCKET_NAME, 0)
+    print(X_train.shape, y_train.shape)
+    
+    print("Création d'un validation set")
+    X_val = X_train[round(0.8*n):]
+    y_val = y_train[round(0.8*n):]
+    
+    X_train = X_train[:round(0.8*n)]
+    y_train = y_train[:round(0.8*n)]
+    
+    # Datasets 
+    print("Création d'un dataset train et d'un ataset val")
+    train_dataset = tf_dataset(X_train, y_train, batch=batch_size)
+    valid_dataset = tf_dataset(X_val, y_val, batch=batch_size)
 
     print("Entrainement du modèle")
     model.fit(
-        train_dataset,
-        epochs=num_epochs,
-        validation_data=valid_dataset,
-        callbacks=callbacks
+       train_dataset,
+       epochs=num_epochs,
+       validation_data=valid_dataset,
+       #callbacks=callbacks
     )
     
     print("Sauvegarde du modèle")
-    joblib.dump(model, "contouring.joblib")
-    
-    
+    save_model(model, 'contouring')

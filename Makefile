@@ -81,7 +81,7 @@ create_bucket:
 	@gsutil mb -l ${REGION} -p ${PROJECT_ID} gs://${BUCKET_NAME}
 
 PACKAGE_NAME = paittern
-FILENAME = contouring.trainer2
+FILENAME = contouring.trainer
 JOB_NAME=contouring_$(shell date +'%Y%m%d_%H%M%S')
 BUCKET_TRAINING_FOLDER = 'trainings'
 PYTHON_VERSION=3.7
@@ -90,6 +90,9 @@ RUNTIME_VERSION=2.2
 
 run_locally:
 	@python -m ${PACKAGE_NAME}.${FILENAME}
+
+TIER="PREMIUM_1" # BASIC | BASIC_GPU | STANDARD_1 | PREMIUM_1 | --scale-tier=${TIER} 
+		
 
 gcp_submit_training:
 	gcloud ai-platform jobs submit training ${JOB_NAME} \

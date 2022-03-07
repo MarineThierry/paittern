@@ -28,10 +28,8 @@ six>=1.14
 joblib
 memoized-property
 termcolor
-cv2
+opencv-python
 
 #model
 tensorflow
-tensorflow.io
-tensorflow.image
 tensorflow_hub

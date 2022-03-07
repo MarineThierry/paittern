@@ -28,16 +28,13 @@ option = st.selectbox(
                  "Sven", "Tamiko", "Teagan", "Theo", "Tiberius", "Titan", "Trayvon", "Ursula",
                  "Wahid", "Walburga", "Waralee", "Yuri"))
 
+
 st.write('You selected:', option)
-
-
-
-
 
 from PIL import Image
 image = Image.open(f'/home/jeremie/code/MarineThierry/paittern/paittern images/{option}.png')
 
-st.image(image, caption='Sunrise by the mountains')
+st.image(image, caption=f'{option}')
 
 img_file_buffer = st.camera_input("Take a picture")
 

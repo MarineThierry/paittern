@@ -77,4 +77,4 @@ def video_to_gif(
     return gif
 
 #test
-# video_to_gif('../../raw_data/input_video/IMG_1525.MOV')
+# video_to_gif('http://res.cloudinary.com/paittern/video/upload/v1646661019/test.mov')

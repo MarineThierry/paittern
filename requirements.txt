@@ -33,3 +33,9 @@ opencv-python
 #model
 tensorflow
 tensorflow_hub
+
+#API
+fastapi
+uvicorn
+cloudinary
+python_dotenv

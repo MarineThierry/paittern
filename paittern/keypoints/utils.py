@@ -1,7 +1,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import matplotlib
+matplotlib.use("Agg")
 from matplotlib.collections import LineCollection
 import matplotlib.patches as patches
 import cv2
@@ -104,8 +105,6 @@ def _keypoints_and_edges_for_display(keypoints_with_scores,height,width,keypoint
     else:
         edges_xy = np.zeros((0, 2, 2))
 
-    print(f'keypoints_xy.shape{keypoints_xy.shape}')
-    print(f'edges_xy.shape{edges_xy.shape}')
     return keypoints_xy, edges_xy, edge_colors
 
 
@@ -129,18 +128,14 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
     A numpy array with shape [out_height, out_width, channel] representing the
     image overlaid with keypoint predictions. """
     height, width, channel = image.shape
-    print(f'image shape: {image.shape}')
-    aspect_ratio = float(width) / height
-    print(f'aspectratio : {aspect_ratio}')
 
-    # breakpoint()
-    # print(f'params default : {plt.rcParams}')
+    aspect_ratio = float(width) / height
     # new_size = plt.rcParams["figure.figsize"] = (6, 4)
     # new_dpi = plt.rcParams["figure.dpi"] = 72
-    fig, ax = plt.subplots(figsize=(12 * aspect_ratio, 12))
-    print(f'plt.subplot:{fig, ax }')
-    # breakpoint()
-    print(f'fig : {fig}' )
+    dpi = 72
+
+    fig, ax = plt.subplots(figsize=(12*aspect_ratio,12),dpi=dpi) # 6 and dpi 72 get good fig size
+
 
     # To remove the huge white borders
     fig.tight_layout(pad=0)
@@ -158,9 +153,7 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
     (keypoint_locs, keypoint_edges,edge_colors) =\
         _keypoints_and_edges_for_display( keypoints_with_scores, height, width)
 
-    print(f'edge_colors:{edge_colors}')
 
-    print(f'keypoint_locs_shape:{keypoint_locs.shape}')
     line_segments.set_segments(keypoint_edges)
     line_segments.set_color(edge_colors)
     if keypoint_edges.shape[0]:
@@ -180,10 +173,7 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
 
     fig.canvas.draw()
     image_from_plot = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    print(image_from_plot.shape)
 
-    print(len(image_from_plot))
-    print(fig.canvas.get_width_height()[::-1]) # ok
     # breakpoint()
     image_from_plot = image_from_plot.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     plt.close(fig)
@@ -194,10 +184,12 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
 
 
 
-def np_to_gif(images, fps): # reuse this function in the package to switch iamge file list to gif
+def np_to_gif(images,file_name, fps): # reuse this function in the package to switch iamge file list to gif
     """Converts image sequence (4D numpy array) to gif."""
-    imageio.mimsave('../data/keypoint_animation.gif', images, fps=fps)
-    return embed.embed_file('../data/keypoint_animation.gif')
+    imageio.mimsave(f'./{file_name}.gif', images, fps=fps)
+    return embed.embed_file(f'./{file_name}.gif')
+    # images[0].save(f'./{file_name}.gif', format='GIF',append_images=images[1:],
+    #                save_all=True,duration=300, loop=0)
 
 def progress(value, max=100):
     return HTML("""

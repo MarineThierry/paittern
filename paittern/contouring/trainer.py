@@ -78,9 +78,9 @@ def upload_model_to_gcp(model_name):
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     # image log
-    print('uploading image_log to gcp')
-    blob = bucket.blob(f'{STORAGE_LOCATION}/{model_name}.pickle')
-    blob.upload_from_filename(f'./image_logs/{model_name}-img_log.pickle')
+    #print('uploading image_log to gcp')
+    #blob = bucket.blob(f'{STORAGE_LOCATION}/{model_name}.pickle')
+    #blob.upload_from_filename(f'./image_logs/{model_name}-img_log.pickle')
     # model
     print('uploading model to gcp')
     current_wd = os.getcwd()
@@ -100,7 +100,7 @@ def save_model(model, model_name):
 
     # saving the trained model to disk is mandatory to then beeing able to upload it to storage
     # Implement here
-    model.save('contouring')
+    model.save('./saved_models/contouring3')
     print("saved contouring locally")
 
     # Implement here
@@ -111,30 +111,30 @@ def save_model(model, model_name):
 if __name__ == "__main__":    
     # Model
     print("Création du modèle")
-    model = my_unet(3, (512,512,3))
+    model = my_unet(4, (512,512,3))
     #model.summary()
     #print("Création metrics")
-    my_iou = MeanIoU(name = "my_iou", num_classes = 2)
+    my_iou = MeanIoU(2, name = "my_iou")
     
-    print("Création des callbacks")
     callbacks = [
-        EarlyStopping(monitor='val_my_iou', patience=5, restore_best_weights=True),
+        EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True),
     ]
+    
     # Hyperparameters 
     print("Assignation des hyper-paramètres")
     batch_size = 16
     lr = 0.0001
-    num_epochs = 20
+    num_epochs = 100
     
     print("Modèle en cours de compilation")
-    model.compile(loss="binary_crossentropy", optimizer=Adam(lr), metrics = my_iou)
+    model.compile(loss="binary_crossentropy", optimizer=Adam(lr), metrics = ["accuracy", my_iou])
     
     
     print("Chargement des données")
     X_train = get_data('image', BUCKET_NAME)
     Y_train = get_data('mask', BUCKET_NAME) 
     print("get_data réalisé")
-    n = 1000
+    n = 20000
     X_train = load_data(X_train, n, BUCKET_NAME, 3)
     y_train = load_data(Y_train, n, BUCKET_NAME, 0)
     print(X_train.shape, y_train.shape)
@@ -156,8 +156,9 @@ if __name__ == "__main__":
        train_dataset,
        epochs=num_epochs,
        validation_data=valid_dataset,
-       #callbacks=callbacks
+       callbacks=callbacks,
+       workers = -1
     )
     
     print("Sauvegarde du modèle")
-    save_model(model, 'contouring')
+    save_model(model, 'contouring3')

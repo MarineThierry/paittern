@@ -7,4 +7,7 @@ raw_data/
 **/__pycache__/
 .env
 paittern/contouring/brouillons/
-models/
+contouring/
+*.h5
+people_segmentation/
+new_data/

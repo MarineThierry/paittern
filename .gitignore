@@ -6,7 +6,15 @@ raw_data/
 *.csv
 **/__pycache__/
 .env
-*.jpg
-*.gif
+paittern/contouring/brouillons/
+contouring/
+*.h5
+people_segmentation/
+saved_models/
 notebooks/
+new_data/
+*.ipynb
+*.jpg
 *.png
+*.gif
+

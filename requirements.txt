@@ -9,6 +9,7 @@ numpy
 pandas
 scikit-learn
 streamlit
+matplotlib
 
 # tests/linter
 black
@@ -33,6 +34,8 @@ opencv-python
 #model
 tensorflow
 tensorflow_hub
+git+https://github.com/tensorflow/docs
+imageio
 
 #API
 fastapi

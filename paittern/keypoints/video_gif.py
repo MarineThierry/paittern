@@ -42,7 +42,9 @@ def video_to_gif(
     - gif_name : file_name for gif output
     - frameRate : step for framing the video
     '''
+    print('video capture begin')
     vidcap = cv2.VideoCapture(file_path_video)
+    print('video captured')
     sec = 0
     count=1
     success = getFrame(path_gif_images,sec,vidcap,count)
@@ -53,7 +55,7 @@ def video_to_gif(
         sec = round(sec, 2)
         success = getFrame(path_gif_images,sec,vidcap,count)
         still_reading, image = vidcap.read()
-
+    print('video capture done')
     # Create the frames
     frames = []
     # imgs lists all imgs captured into a sort of list
@@ -69,8 +71,10 @@ def video_to_gif(
 
     frames[0].save(f'{path_gif_output}{gif_name}.gif', format='GIF',append_images=frames[1:],save_all=True,duration=300, loop=0)
 
+    #url upload cloudinary
 
-
+    print('gif')
+    #gif_path = url cloudinary
     gif_path = f'{path_gif_output}{gif_name}.gif'
     gif = read_file(gif_path)
     gif = decode_gif(gif)

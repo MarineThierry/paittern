@@ -54,16 +54,16 @@ def get_best_poses(keypoints_sequence,images,n=10):
     #save images
 
     for idx in best_poses_idx :
-        cv2.imwrite("../pose"+str(idx)+".jpg", cv2.cvtColor( output_images[idx], cv2.COLOR_RGB2BGR))
+        cv2.imwrite("../pose"+str(idx)+".jpg", cv2.cvtColor( images[idx], cv2.COLOR_RGB2BGR))
 
     return best_poses_idx #best_poses_idx#index_best_poses # list of the index of the best poses
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    gif = video_to_gif('../../raw_data/input_video/IMG_1525.MOV')
-    keypoints_sequence, output_images= run_model_gif(gif)
-    best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
+#     gif = video_to_gif('../../raw_data/input_video/IMG_1525.MOV')
+#     keypoints_sequence, output_images= run_model_gif(gif)
+#     best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
 
 
 

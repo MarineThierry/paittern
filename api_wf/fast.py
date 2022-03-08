@@ -24,27 +24,29 @@ app.add_middleware(
 
 @app.get("/")
 def index():
+    print('hey')
     return {"greeting": "Hello world"}
 
 
 @app.get("/predict")
-def predict(url_video_path,pattern,height=168):
-
-
+def predict(url,pattern,height=168):
 
     # first step is to retrieve the video_file : streamlit file will save the video
     #into a cloud storage and return as a parameter the url of video's path
     # so first step is to get the video from the url provided
 
-    gif = video_to_gif(url_video_path)
+    gif = video_to_gif(url)
+    print('flag1 - gif done')
+    print(gif)
     keypoints_sequence, output_images= run_model_gif(gif)
-    best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
+    print('flag2 - run done')
+    # best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
 
-    for img in best_poses_idx:
-        contour = get_contour(gif[img]) # a modifier, constitue la réalisation des contours de l'image
-        #draw_prediction_on_image(contour,keypoints_sequence[img])
+    # for img in best_poses_idx:
+    #     contour = get_contour(gif[img]) # a modifier, constitue la réalisation des contours de l'image
+    #     #draw_prediction_on_image(contour,keypoints_sequence[img])
 
-    measures_pred = get_mensuration(best_poses_idx,pattern,height) # fonction romain
+    # measures_pred = get_mensuration(best_poses_idx,pattern,height) # fonction romain
 
 
     # translate height to desired unit
@@ -52,4 +54,4 @@ def predict(url_video_path,pattern,height=168):
 
 
 
-    return {'Am I working?' :  'YESSSS'}
+    return {'working' :  'SUCCESS'}

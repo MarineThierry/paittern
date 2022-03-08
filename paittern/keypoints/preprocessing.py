@@ -1,9 +1,10 @@
 import tensorflow as tf
-from utils import KEYPOINT_DICT
+from paittern.keypoints.utils import KEYPOINT_DICT
 import numpy as np
 
 # Confidence score to determine whether a keypoint prediction is reliable.
 MIN_CROP_KEYPOINT_SCORE = 0.2
+
 
 def init_crop_region(image_height, image_width):
     """Defines the default crop region.

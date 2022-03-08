@@ -1,5 +1,47 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
+import cv2
+
+
+
+#------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------
+
+
+# array = cv2.imread(r"pexels-photo-60219.png")
+# matrix_front_T_cont = array.mean(axis=-1)
+# print(matrix_front_T_cont.shape)
+
+# test_matrix_front_kp = np.array([[0.48695812, 0.68326586, 0.5639537 ],
+#           [0.4778103 , 0.68713045, 0.50732034],
+#           [0.47737232, 0.67476934, 0.5956619 ],
+#           [0.4883077 , 0.70074975, 0.57466257],
+#           [0.4893417 , 0.6668179 , 0.49692088],
+#           [0.52557784, 0.7172219 , 0.48050335],
+#           [0.539968  , 0.6626774 , 0.5938845 ],
+#           [0.52591187, 0.7609507 , 0.21174023],
+#           [0.54629296, 0.63570327, 0.28719622],
+#           [0.51536655, 0.852199  , 0.3918358 ],
+#           [0.51517344, 0.62228054, 0.13233644],
+#           [0.6867487 , 0.70954204, 0.4412909 ],
+#           [0.68755573, 0.6688813 , 0.366415  ],
+#           [0.8038848 , 0.72793126, 0.46259767],
+#           [0.7948738 , 0.6616839 , 0.4294906 ],
+#           [0.9306485 , 0.737101  , 0.3557214 ],
+#           [0.9053455 , 0.621957  , 0.37097037]])
+
+# #New matrix with new KP
+# additional_kp_front(test_matrix_front_kp,test_matrix_front_kp )
+# test_matrix_front_kp = additional_kp_front(test_matrix_front_kp,test_matrix_front_kp )[0]
+# test_matrix_front_kp_1 =  additional_kp_front(test_matrix_front_kp,test_matrix_front_kp )[1]
+# #New matrix with new KP + converted into pixels coordinates
+# test_matrix_front_kp_conv = convert_kp_matrix_front_T(test_matrix_front_kp, 768, 1024)
+# test_matrix_front_kp_1_conv = convert_kp_matrix_front_I(test_matrix_front_kp, 768, 1024)
+
+
+
+
 
 #------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------
@@ -19,11 +61,11 @@ def additional_kp_front(image_front_T_kp, image_front_I_kp):
 
     #Biceps - Image front I
     #left biceps pos 17
-    l_x12 = abs(image_front_T_kp[7][1] + image_front_T_kp[5][1])/2
-    l_y12 = image_front_T_kp[5][0] + abs(image_front_T_kp[7][0] - image_front_T_kp[5][0])/2
+    l_x12 = abs(image_front_I_kp[7][1] + image_front_I_kp[5][1])/2
+    l_y12 = image_front_I_kp[5][0] + abs(image_front_I_kp[7][0] - image_front_I_kp[5][0])/2
     #right biceps pos 18
-    r_x12 = abs(image_front_T_kp[8][1]+image_front_T_kp[6][1])/2
-    r_y12 = image_front_T_kp[6][0] + (image_front_T_kp[8][0] + image_front_T_kp[6][0])/2
+    r_x12 = abs(image_front_I_kp[8][1]+image_front_I_kp[6][1])/2
+    r_y12 = image_front_I_kp[6][0] + (image_front_I_kp[8][0] + image_front_I_kp[6][0])/2
 
 
     #left chest, right chest                      pos 19 / 20
@@ -61,26 +103,26 @@ def additional_kp_front(image_front_T_kp, image_front_I_kp):
 def additional_kp_profile(image_profile_kp):
     #left biceps pos 17
     l_x1 = (image_profile_kp[7][1] + image_profile_kp[5][1])/2                            #average on x
-    l_y1 = image_front_T_kp[5][0] + (image_front_T_kp[7][0] - image_front_T_kp[5][0])/2   #considering biceps is at half shoulder/elbow
+    l_y1 = image_profile_kp[5][0] + (image_profile_kp[7][0] - image_profile_kp[5][0])/2   #considering biceps is at half shoulder/elbow
     #right biceps pos 18
-    r_x1 = abs(image_front_T_kp[8][1] + image_front_T_kp[6][1])/2                         #average on x
-    r_y1 = image_front_T_kp[6][0] + (image_front_T_kp[8][0] + image_front_T_kp[6][0])/2   #considering biceps is at half shoulder/elbow
+    r_x1 = abs(image_profile_kp[8][1] + image_profile_kp[6][1])/2                         #average on x
+    r_y1 = image_profile_kp[6][0] + (image_profile_kp[8][0] - image_profile_kp[6][0])/2   #considering biceps is at half shoulder/elbow
 
     #left chest, right chest                      pos 19 / 20
     #left chest pos 19
     l_x2 = l_x1
-    l_y2 = image_front_T_kp[5][0] + abs(image_front_T_kp[11][0] - image_front_T_kp[5][0]) * 1/3  #considering chest "y" located  at 1/3 vs shoulders/hips
+    l_y2 = image_profile_kp[5][0] + abs(image_profile_kp[11][0] - image_profile_kp[5][0]) * 1/3  #considering chest "y" located  at 1/3 vs shoulders/hips
     #right chest pos 20
     r_x2 = r_x1
-    r_y2 = image_front_T_kp[6][0] + abs(image_front_T_kp[12][0] - image_front_T_kp[6][0]) * 1/3  #considering chest "y" located  at 1/3 vs shoulders/hips
+    r_y2 = image_profile_kp[6][0] + abs(image_profile_kp[12][0] - image_profile_kp[6][0]) * 1/3  #considering chest "y" located  at 1/3 vs shoulders/hips
 
     #left waist, right waist                       pos 21 / 22
     #left waist pos 21
     l_x3 = l_x1
-    l_y3 = image_front_T_kp[5][0] + abs(image_front_T_kp[11][0] - image_front_T_kp[5][0]) * 2/3  #considering chest "y" located  at 2/3 vs shoulders/hi
+    l_y3 = image_profile_kp[5][0] + abs(image_profile_kp[11][0] - image_profile_kp[5][0]) * 2/3  #considering chest "y" located  at 2/3 vs shoulders/hi
     #right waist pos 22
     r_x3 = r_x1
-    r_y3 = image_front_T_kp[6][0] + abs(image_front_T_kp[12][0] - image_front_T_kp[6][0]) * 2/3  #considering chest "y" located  at 2/3 vs shoulders/hips
+    r_y3 = image_profile_kp[6][0] + abs(image_profile_kp[12][0] - image_profile_kp[6][0]) * 2/3  #considering chest "y" located  at 2/3 vs shoulders/hips
 
     #append new keypoints into matrix_kp
     new_matrix_kp_profile = np.vstack((image_front_T_kp, np.array([l_y1, l_x1, 0]), np.array([r_y1, r_x1, 0]), \
@@ -277,24 +319,28 @@ dico_pattern_measures={
     'Aaron': ['Biceps circumference','Chest circumference','HPS to waist back','Hips circumference','Neck circumference',
               'Shoulder slope','Shoulder to shoulder','Waist to hips'],
 }
+
 #Dictionnary of measure / associated function
 dico_measures = {
-    'Biceps circumference' : [biceps_circumference(test_matrix_front_kp_conv, matrix_cont)],
-    'Chest circumference' : [chest_circumference(test_matrix_front_kp_conv, matrix_cont,
-                                                 test_matrix_front_kp_conv, matrix_cont, )],
-    'HPS to waist back' : [hps_to_waist_back(test_matrix_front_kp_conv, matrix_cont)],
-    'Hips circumference' : [hips_circumference(test_matrix_front_kp_conv, matrix_cont, test_matrix_front_kp_conv, matrix_cont)],
-    'Neck circumference' : [neck_circumference(test_matrix_front_kp_conv, matrix_cont)],
-    'Shoulder slope' : [shoulder_slope(test_matrix_front_kp_conv, matrix_cont)],
-    'Shoulder to shoulder': [shoulder_to_shoulder(test_matrix_front_kp_conv, matrix_cont)],
-    'Waist to hips' : [waist_to_hips(test_matrix_front_kp_conv, matrix_cont)]
+    'Biceps circumference' : [biceps_circumference(matrix_front_T_kp_conv, matrix_front_T_cont)],
+    'Chest circumference' : [chest_circumference(matrix_front_T_kp_conv, matrix_front_T_cont,
+                                                 matrix_profile_kp_conv, matrix_profile_cont, )],
+    'HPS to waist back' : [hps_to_waist_back(matrix_front_T_kp_conv, matrix_front_T_cont)],
+    'Hips circumference' : [hips_circumference(matrix_front_T_kp_conv, matrix_front_T_cont,
+                                                 matrix_profile_kp_conv, matrix_profile_cont, )],
+    'Neck circumference' : [neck_circumference(matrix_profile_kp_conv, matrix_profile_cont,)],
+    'Shoulder slope' : [shoulder_slope(matrix_front_T_kp_conv, matrix_front_T_cont)],
+    'Shoulder to shoulder': [shoulder_to_shoulder(matrix_front_I_kp_conv, matrix_front_I_cont)],
+    'Waist to hips' : [waist_to_hips(matrix_front_T_kp_conv, matrix_front_T_cont)]
 }
 
 def get_measures(pattern):
     measures = {}
     for i in range(0,len(dico_pattern_measures[pattern])):
         #print(measures[i])
-        #measures[i].append(dico_measures[i])
         measures[dico_pattern_measures[pattern][i]] = dico_measures[dico_pattern_measures[pattern][i]]
 
     return measures
+
+#Test
+get_measures('Aaron')

@@ -8,10 +8,10 @@
 numpy
 pandas
 scikit-learn
-tensorflow
 opencv-python
 temp
 keras
+streamlit
 
 # tests/linter
 #black
@@ -28,8 +28,19 @@ google-cloud-storage
 
 # utilities
 #six>=1.14
-joblib
-#memoized-property
-#termcolor
 #urllib3>=1.21.1
 #fsspec==2022.02.0
+memoized-property
+termcolor
+opencv-python
+joblib
+
+#model
+tensorflow
+tensorflow_hub
+
+#API
+fastapi
+uvicorn
+cloudinary
+python_dotenv

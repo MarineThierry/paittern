@@ -1,3 +1,4 @@
+from re import M
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -40,7 +41,11 @@ import cv2
 # test_matrix_front_kp_1_conv = convert_kp_matrix_front_I(test_matrix_front_kp, 768, 1024)
 
 
+#------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------
 
+image_l = matrix_front_T_cont.shape[1]
+image_h = matrix_front_T_cont.shape[0]
 
 
 #------------------------------------------------------------------------------------------------------------------------
@@ -125,7 +130,7 @@ def additional_kp_profile(image_profile_kp):
     r_y3 = image_profile_kp[6][0] + abs(image_profile_kp[12][0] - image_profile_kp[6][0]) * 2/3  #considering chest "y" located  at 2/3 vs shoulders/hips
 
     #append new keypoints into matrix_kp
-    new_matrix_kp_profile = np.vstack((image_front_T_kp, np.array([l_y1, l_x1, 0]), np.array([r_y1, r_x1, 0]), \
+    new_matrix_kp_profile = np.vstack((image_profile_kp, np.array([l_y1, l_x1, 0]), np.array([r_y1, r_x1, 0]), \
                               np.array([l_y2, l_x2, 0]), np.array([r_y2, r_x2, 0]), \
                               np.array([l_y3, l_x3, 0]), np.array([r_y3, r_x3, 0])))
 
@@ -163,14 +168,17 @@ def convert_kp_matrix_profile(matrix_kp_profile, image_h, image_l):
     return matrix_kp_converted
 
 # Define ratio between real measure(in mm) vs pixel position
-# def ratio_real_vs_pixel(real_height, matrix_image_contouring, image_l):
-#     list_sum_y=[]
-#     #sum of all "1" for each x to get the sum max ie. height
-#     for i in range(0,image_l):
-#         list_sum_y.append(np.sum(matrix_image_contouring[: , i]))
-#     print(max(list_sum_y))
-#     ratio_mm_px = real_height / max(list_sum_y)                            #ratio real height (in mm) / max sum of "1"
-#     return ratio_mm_px
+def ratio_real_vs_pixel(real_height, matrix_image_contouring, image_l):
+    list_sum_y=[]
+    #sum of all "1" for each x to get the sum max ie. height
+    for i in range(0,image_l):
+        list_sum_y.append(np.sum(matrix_image_contouring[: , i]))
+    print(max(list_sum_y))
+    ratio_mm_px = real_height / max(list_sum_y)                            #ratio real height (in mm) / max sum of "1"
+    return ratio_mm_px
+
+
+ratio_mm_px = ratio_real_vs_pixel(real_height, matrix_profile_cont, image_l)
 
 #------------------------------------------------------------------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------

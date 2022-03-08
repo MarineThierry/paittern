@@ -267,3 +267,34 @@ def waist_to_hips(matrix_kp_front_converted, matrix_image_front_cont):
     #convert in mm and apply factor of 1.2
     distance = a * 1.2 * ratio_mm_px
     return distance
+
+
+#------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------
+
+#Dictionnary of required measures for each pattern
+dico_pattern_measures={
+    'Aaron': ['Biceps circumference','Chest circumference','HPS to waist back','Hips circumference','Neck circumference',
+              'Shoulder slope','Shoulder to shoulder','Waist to hips'],
+}
+#Dictionnary of measure / associated function
+dico_measures = {
+    'Biceps circumference' : [biceps_circumference(test_matrix_front_kp_conv, matrix_cont)],
+    'Chest circumference' : [chest_circumference(test_matrix_front_kp_conv, matrix_cont,
+                                                 test_matrix_front_kp_conv, matrix_cont, )],
+    'HPS to waist back' : [hps_to_waist_back(test_matrix_front_kp_conv, matrix_cont)],
+    'Hips circumference' : [hips_circumference(test_matrix_front_kp_conv, matrix_cont, test_matrix_front_kp_conv, matrix_cont)],
+    'Neck circumference' : [neck_circumference(test_matrix_front_kp_conv, matrix_cont)],
+    'Shoulder slope' : [shoulder_slope(test_matrix_front_kp_conv, matrix_cont)],
+    'Shoulder to shoulder': [shoulder_to_shoulder(test_matrix_front_kp_conv, matrix_cont)],
+    'Waist to hips' : [waist_to_hips(test_matrix_front_kp_conv, matrix_cont)]
+}
+
+def get_measures(pattern):
+    measures = {}
+    for i in range(0,len(dico_pattern_measures[pattern])):
+        #print(measures[i])
+        #measures[i].append(dico_measures[i])
+        measures[dico_pattern_measures[pattern][i]] = dico_measures[dico_pattern_measures[pattern][i]]
+
+    return measures

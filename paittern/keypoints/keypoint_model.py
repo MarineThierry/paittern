@@ -11,10 +11,6 @@ import numpy as np
 
 
 
-
-
-
-
 def movenet(input_image,module):
     """Runs detection on an input image.
 

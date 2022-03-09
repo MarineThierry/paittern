@@ -2,11 +2,6 @@ from tensorflow.keras.utils import CustomObjectScope
 import tensorflow as tf
 import cv2
 import numpy as np
-# from paittern import paittern_package
-# from paittern.paittern_package import *
-from paittern.paittern_package.keypoint_model import run_model_gif
-from paittern.paittern_package.video_gif import video_to_gif
-from selection_pose import get_best_poses
 
 with CustomObjectScope():
     model = tf.keras.models.load_model("./paittern/contouring/contouring_model")

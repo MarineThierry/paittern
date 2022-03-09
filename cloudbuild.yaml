@@ -1,4 +1,4 @@
 steps:
-- name: 'gcr.io/cloud-builders/gcloud'
+- name: 'gcr.io/cloud-builders/docker'
   args: ['sleep', '900']
 timeout: 900s

@@ -1,7 +1,6 @@
-from re import M
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import cv2
 
 def additional_kp_front(image_front_T_kp, image_front_I_kp):
@@ -90,7 +89,13 @@ def sum_segment(origin, direction, image):
         return x_right - x_left + 1
 
 #BICEPS CIRCUMFERENCE _ Front picture in T shape
-def biceps_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def biceps_circumference(ratio_mm_px,
+                         matrix_kp_front_converted, 
+                         matrix_image_front_cont,
+                         matrix_kp_front_I_converted,
+                         matrix_image_front_I_cont,
+                         matrix_kp_profile_converted, 
+                         matrix_image_profile_cont):
     #left biceps
     sum_left = sum_segment(matrix_kp_front_converted[17], 'height', matrix_image_front_cont)
 
@@ -105,18 +110,24 @@ def biceps_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_fr
     return  round(circumference_biceps)
 
 #CHEST CIRCUMFERENCE _ Front picture in T shape + profile picture
-def chest_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, 
-                        matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def chest_circumference(ratio_mm_px,
+                         matrix_kp_front_converted, 
+                         matrix_image_front_cont,
+                         matrix_kp_front_I_converted,
+                         matrix_image_front_I_cont,
+                         matrix_kp_profile_converted, 
+                         matrix_image_profile_cont):
     #measure width (along axis x) for given y, on front picture
+    print(matrix_kp_front_converted[19])
     y_front1 = sum_segment(matrix_kp_front_converted[19], 'width', matrix_image_front_cont)
     y_front2 = sum_segment(matrix_kp_front_converted[20], 'width', matrix_image_front_cont)
     sum_x_front = int((y_front1+y_front2)/2)
 
     #measure width (along axis x) for given y, on profile picture
-    #y_prof1 = sum_segment(matrix_kp_front_converted[19], 'width', matrix_image_profile_cont)
-    #y_prof2 = sum_segment(matrix_kp_front_converted[20], 'width', matrix_image_profile_cont)
-    #sum_x_prof = int((y_prof1 + y_prof2)/2)
-    sum_x_prof = sum_x_front / 2
+    y_prof1 = sum_segment(matrix_kp_profile_converted[11], 'width', matrix_image_profile_cont)
+    y_prof2 = sum_segment(matrix_kp_profile_converted[12], 'width', matrix_image_profile_cont)
+    sum_x_prof = int((y_prof1 + y_prof2)/2)
+    #sum_x_prof = sum_x_front / 2
 
     #chest circumference in mm
     circumference_chest = (sum_x_front + sum_x_prof) * 2 * ratio_mm_px
@@ -124,7 +135,13 @@ def chest_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_fro
     return round(circumference_chest)
 
 #HPS TO WAIST BACK _ Current solution is distance between shoulder (# 5 / 6) and waist (# 21 / 22) with a factor 1.2
-def hps_to_waist_back(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def hps_to_waist_back(ratio_mm_px,
+                     matrix_kp_front_converted, 
+                     matrix_image_front_cont,
+                     matrix_kp_front_I_converted,
+                     matrix_image_front_I_cont,
+                     matrix_kp_profile_converted, 
+                     matrix_image_profile_cont):
     a = (abs(matrix_kp_front_converted[5][0] - matrix_kp_front_converted[21][0]) + abs(matrix_kp_front_converted[6][0] - matrix_kp_front_converted[22][0])) /2
     #convert in mm and apply factor of 1.2
     distance = a * 1.2 * ratio_mm_px
@@ -132,8 +149,13 @@ def hps_to_waist_back(ratio_mm_px, matrix_kp_front_converted, matrix_image_front
 
 
 #HIPS_CIRCUMFERENCE _ Front picture in T shape + Profile picture
-def hips_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None): #matrix_kp_profile_converted, matrix_image_profile_cont):
-
+def hips_circumference(ratio_mm_px,
+                     matrix_kp_front_converted, 
+                     matrix_image_front_cont,
+                     matrix_kp_front_I_converted,
+                     matrix_image_front_I_cont,
+                     matrix_kp_profile_converted, 
+                     matrix_image_profile_cont): 
     #measure width (along axis x) for given y, on front picture
     y_front1 = sum_segment(matrix_kp_front_converted[11], 'width', matrix_image_front_cont)
     y_front2 = sum_segment(matrix_kp_front_converted[12], 'width', matrix_image_front_cont)
@@ -150,7 +172,13 @@ def hips_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_fron
     return round(hips_circ)
 
 #NECK_CIRCUMFERENCE _ Profile picture
-def neck_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def neck_circumference(ratio_mm_px,
+                     matrix_kp_front_converted, 
+                     matrix_image_front_cont,
+                     matrix_kp_front_I_converted,
+                     matrix_image_front_I_cont,
+                     matrix_kp_profile_converted, 
+                     matrix_image_profile_cont):
     #Estimated neck position on y located at 1/3 above shoulders vs ears
     y_shoulder = matrix_kp_front_converted[6][1]
     y_head = matrix_kp_front_converted[0][1]
@@ -167,11 +195,23 @@ def neck_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_fron
 
 #SHOULDER_SLOPE _ Front picture in T shape
 #Consider distance (on x) between shoulder kp and ear kp, plus half width of biceps
-def shoulder_slope(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def shoulder_slope(ratio_mm_px,
+                 matrix_kp_front_converted, 
+                 matrix_image_front_cont,
+                 matrix_kp_front_I_converted,
+                 matrix_image_front_I_cont,
+                 matrix_kp_profile_converted, 
+                 matrix_image_profile_cont):
     return 0.314
 
 #SHOULDER TO SHOULDER _ Front picture in I shape
-def shoulder_to_shoulder(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def shoulder_to_shoulder(ratio_mm_px,
+                         matrix_kp_front_converted, 
+                         matrix_image_front_cont,
+                         matrix_kp_front_I_converted,
+                         matrix_image_front_I_cont,
+                         matrix_kp_profile_converted, 
+                         matrix_image_profile_cont):
     #average y for shoulders kp
     y1 =int(( matrix_kp_front_converted[5][1] + matrix_kp_front_converted[6][1] ) / 2)
     #distance (on x) between shoulders
@@ -181,7 +221,13 @@ def shoulder_to_shoulder(ratio_mm_px, matrix_kp_front_converted, matrix_image_fr
     return round(distance)
 
 # WAIST CIRCUMFERENCE _ Front picture in T shape + Profile picture
-def waist_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def waist_circumference(ratio_mm_px,
+                     matrix_kp_front_converted, 
+                     matrix_image_front_cont,
+                     matrix_kp_front_I_converted,
+                     matrix_image_front_I_cont,
+                     matrix_kp_profile_converted, 
+                     matrix_image_profile_cont):
 
     #measure width (along axis x) for given y, on front picture
     y_front1 = sum_segment(matrix_kp_front_converted[21], 'width', matrix_image_front_cont)
@@ -199,7 +245,13 @@ def waist_circumference(ratio_mm_px, matrix_kp_front_converted, matrix_image_fro
     return round(waist_circumference)
 
 #WAIST_TO_HIPS _ Front picture in T shape
-def waist_to_hips(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont, matrix_kp_profile_converted=None, matrix_image_profile_cont=None):
+def waist_to_hips(ratio_mm_px,
+                 matrix_kp_front_converted, 
+                 matrix_image_front_cont,
+                 matrix_kp_front_I_converted,
+                 matrix_image_front_I_cont,
+                 matrix_kp_profile_converted, 
+                 matrix_image_profile_cont):
     #average distance (on y) between waist(21,22) and hips(11,12) with correction factor of 1.2
     a = (abs(matrix_kp_front_converted[22][1] - matrix_kp_front_converted[12][1])
          +abs(matrix_kp_front_converted[21][1] - matrix_kp_front_converted[11][1])) / 2
@@ -222,37 +274,49 @@ dico_pattern_measures={
 def get_measures(pattern,
                  ratio_mm_px,
                  matrix_kp_front_converted, 
-                 matrix_image_front_cont, 
-                 matrix_kp_profile_converted=None, 
-                 matrix_image_profile_cont=None):
+                 matrix_image_front_cont,
+                 matrix_kp_front_I_converted,
+                 matrix_image_front_I_cont,
+                 matrix_kp_profile_converted, 
+                 matrix_image_profile_cont,
+                ):
     measures = {}
     for name, function in dico_pattern_measures[pattern].items():
-        measures[name]=function(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_cont)
+        measures[name]=function(ratio_mm_px,
+                                 matrix_kp_front_converted, 
+                                 matrix_image_front_cont,
+                                 matrix_kp_front_I_converted,
+                                 matrix_image_front_I_cont,
+                                 matrix_kp_profile_converted, 
+                                 matrix_image_profile_cont)
 
     return measures
 
 def from_pix2measures(pattern,
                       real_height,
                      front_T_kp, 
-                     #front_I_kp,
-                     #profile_kp,
+                     front_I_kp,
+                     profile_kp,
                      front_T_cont,
-                     #front_I_cont,
-                     #profile_cont
+                     front_I_cont,
+                     profile_cont
                      ):
     
     # On ajoute des kp additionnels #
-    front_T_kp_plus, front_I_kp_plus = additional_kp_front(front_T_kp, front_T_kp)
+    front_T_kp_plus, front_I_kp_plus = additional_kp_front(front_T_kp, front_I_kp)
     
     # On dénormalise les matrices de kp #
     front_T_kp_plus = denormalize(front_T_kp_plus, front_T_cont.shape[0], front_T_cont.shape[1])
-    #front_I_kp_plus = denormalize(front_I_kp_plus, front_I_cont.shape[0], front_I_cont.shape[1])
-    #profile_kp_plus = denormalize(profile_kp_plus, profile_cont.shape[0], profile_cont.shape[1])
+    front_I_kp_plus = denormalize(front_I_kp_plus, front_I_cont.shape[0], front_I_cont.shape[1])
+    profile_kp_plus = denormalize(profile_kp, profile_cont.shape[0], profile_cont.shape[1])
     
     # On calcule la valeur d'un pixel en mm #
     ratio_mm_px = ratio_real_vs_pixel(real_height, front_T_cont)
     
     # On obtient les mesures pour un pattern spécifique #
-    dico_measures = get_measures(pattern,ratio_mm_px, front_T_kp_plus, front_T_cont)
+    dico_measures = get_measures(pattern,ratio_mm_px, 
+                                 front_T_kp_plus, front_T_cont, 
+                                 front_I_kp_plus, front_I_cont,
+                                profile_kp_plus, profile_cont)
     
     return dico_measures

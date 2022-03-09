@@ -6,6 +6,10 @@ from paittern.selection.selection_pose import get_best_poses
 import os
 from dotenv import load_dotenv, find_dotenv
 import requests
+from tensorflow.keras.utils import CustomObjectScope
+import tensorflow as tf
+from paittern.contouring.predict import predict_mask
+
 
 
 '''API to obtain inputs from user (video, height and pattern desired) and predict
@@ -24,32 +28,39 @@ app.add_middleware(
 
 @app.get("/")
 def index():
+    print('hey')
     return {"greeting": "Hello world"}
 
 
 @app.get("/predict")
-def predict(url_video_path,pattern,height=168):
-
-
+def predict(url,pattern,height=168):
 
     # first step is to retrieve the video_file : streamlit file will save the video
     #into a cloud storage and return as a parameter the url of video's path
     # so first step is to get the video from the url provided
 
-    gif = video_to_gif(url_video_path)
+    gif = video_to_gif(url)
+    print('flag1 - gif done')
+    print(gif)
     keypoints_sequence, output_images= run_model_gif(gif)
+    print('flag2 - run done')
+
     best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
-
-    for img in best_poses_idx:
-        contour = get_contour(gif[img]) # a modifier, constitue la réalisation des contours de l'image
-        #draw_prediction_on_image(contour,keypoints_sequence[img])
-
-    measures_pred = get_mensuration(best_poses_idx,pattern,height) # fonction romain
-
-
+    print('flag3 - run done')
+    with CustomObjectScope():
+        model = tf.keras.models.load_model("./paittern/contouring/contouring_model")
+    print(model)
+    #countouring
+    print('flag4 - enter contour')
+    mask_list=[]
+    for idx in best_poses_idx:
+        mask = predict_mask(output_images[idx],model)
+        mask_list.append(mask)
+    print(mask_list)
     # translate height to desired unit
     # formating pattern type
 
 
 
-    return {'body measures' : measures_pred}
+
+    return {'working' :  'SUCCESS'}

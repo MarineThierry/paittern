@@ -1,8 +1,8 @@
 # packaging
-#pip>=9
-#setuptools>=26
-#twine
-#wheel>=0.29
+pip>=9
+setuptools>=26
+twine
+wheel>=0.29
 
 # data science
 numpy
@@ -12,24 +12,25 @@ opencv-python
 temp
 keras
 streamlit
+matplotlib
 
 # tests/linter
-#black
-#coverage
-#flake8
-#pytest
-#yapf
+black
+coverage
+flake8
+pytest
+yapf
 
 # API
-#gcsfs
+gcsfs
 google-cloud-storage
-#mlflow
-#s3fs
+mlflow
+s3fs
 
 # utilities
-#six>=1.14
-#urllib3>=1.21.1
-#fsspec==2022.02.0
+six>=1.14
+urllib3>=1.21.1
+fsspec==2022.02.0
 memoized-property
 termcolor
 opencv-python
@@ -38,6 +39,8 @@ joblib
 #model
 tensorflow
 tensorflow_hub
+git+https://github.com/tensorflow/docs
+imageio
 
 #API
 fastapi

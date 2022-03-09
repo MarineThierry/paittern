@@ -130,8 +130,6 @@ def draw_prediction_on_image(image, keypoints_with_scores, crop_region=None, clo
     height, width, channel = image.shape
 
     aspect_ratio = float(width) / height
-    # new_size = plt.rcParams["figure.figsize"] = (6, 4)
-    # new_dpi = plt.rcParams["figure.dpi"] = 72
     dpi = 72
 
     fig, ax = plt.subplots(figsize=(12*aspect_ratio,12),dpi=dpi) # 6 and dpi 72 get good fig size
@@ -188,8 +186,7 @@ def np_to_gif(images,file_name, fps): # reuse this function in the package to sw
     """Converts image sequence (4D numpy array) to gif."""
     imageio.mimsave(f'./{file_name}.gif', images, fps=fps)
     return embed.embed_file(f'./{file_name}.gif')
-    # images[0].save(f'./{file_name}.gif', format='GIF',append_images=images[1:],
-    #                save_all=True,duration=300, loop=0)
+
 
 def progress(value, max=100):
     return HTML("""

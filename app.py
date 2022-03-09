@@ -5,27 +5,53 @@ import cloudinary.uploader
 import os
 from os.path import join,dirname
 from dotenv import load_dotenv, find_dotenv
+import streamlit as st
+import tensorflow as tf
+import requests
+
 
 st.set_option('deprecation.showfileUploaderEncoding', False)
 
 uploaded_file = st.file_uploader("Upload Your Video", type=["mp4", "MOV"])
 
-if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
-    st.write(data)
-
-
-number = st.number_input('Enter your size (Height) in cm :')
-
-st.write('You measure : ', number * 100, ' cm')
-
-import streamlit as st
-import tensorflow as tf
+# load the video input into cloudinary
 
 
 
+# point to .env file
+env_path = join(dirname(dirname('__file__')),'.env') # ../.env
+env_path = find_dotenv() # automatic find
 
-option = st.selectbox(
+# load your api key as environment variables
+load_dotenv(env_path)
+
+#config cloudinary authentification
+cloudinary.config(
+  cloud_name = "paittern",
+  api_key = os.getenv('CLOUDINARY_API_KEY'),
+  api_secret = os.getenv('CLOUDINARY_API_SECRET'),
+  secure = True
+)
+
+#upload on cloud
+if  uploaded_file :
+    response_cloud = cloudinary.uploader.unsigned_upload(uploaded_file.read(),
+                                                         resource_type='video',
+                                                         upload_preset='paittern',
+                                                         public_id = "test")
+
+    url_video_path = response_cloud['url']
+    st.markdown(url_video_path)
+
+height_cm = st.number_input('Enter your size (Height) in cm :')
+
+st.write('You measure : ', height_cm * 100, ' cm')
+
+
+
+
+
+pattern = st.selectbox(
      'Choose your pAIttern !',
      ("Aaron", "Albert", "Bee", "Bella", "Benjamin","Bent", "Breanna", "Brian", "Bruce", "Carlita",
                  "Carlton", "Cathrin", "Charlie", "Cornelius", "Diana", "Florence", "Florent", "Holmes", "Hortensia",
@@ -33,16 +59,16 @@ option = st.selectbox(
                  "Sven", "Tamiko", "Teagan", "Theo", "Tiberius", "Titan", "Trayvon", "Ursula",
                  "Wahid", "Walburga", "Waralee", "Yuri"))
 
-st.write('You selected:', option)
+st.write('You selected:', pattern)
 
 
 
 
 
-from PIL import Image
-image = Image.open(f'/home/jeremie/code/MarineThierry/paittern/paittern images/{option}.png')
+# from PIL import Image
+# image = Image.open(f'paittern/api_wf/pose19.png')
 
-st.image(image, caption='Sunrise by the mountains')
+# st.image(image, caption='Sunrise by the mountains')
 
 img_file_buffer = st.camera_input("Take a picture")
 
@@ -97,31 +123,21 @@ components.html("""
   </script>""", height=600)
 
 
-# load the video input into cloudinary
+## requests the predictions on measurements
+url = 'to complete'
+
+
+params = {
+  'url_video_path': url_video_path,
+  'height': height_cm,
+  'pattern' : pattern
+
+}
+
+response_api = requests.get(url,params=params)
+prediction = response_api.json()
+measures = prediction["working"]
 
 
 
-# point to .env file
-env_path = join(dirname(dirname('__file__')),'.env') # ../.env
-env_path = find_dotenv() # automatic find
-
-# load your api key as environment variables
-load_dotenv(env_path)
-
-#config cloudinary authentification
-cloudinary.config(
-  cloud_name = "paittern",
-  api_key = os.getenv('CLOUDINARY_API_KEY'),
-  api_secret = os.getenv('CLOUDINARY_API_SECRET'),
-  secure = True
-)
-
-#upload on cloud
-response =\
-cloudinary.uploader.unsigned_upload(
-    "...",#add uploaded video from streamlit
-    resource_type='video',
-    upload_preset='paittern',
-    public_id = "test")
-
-url_video_path = response['url']
+st.markdown('Am I working? ',str(measures))

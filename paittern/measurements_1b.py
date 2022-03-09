@@ -209,7 +209,7 @@ def waist_to_hips(ratio_mm_px, matrix_kp_front_converted, matrix_image_front_con
 
 #Dictionnary of required measures for each pattern
 dico_pattern_measures={
-    'Aaron': {#'biceps':biceps_circumference, 
+    'Aaron': {'biceps':biceps_circumference, 
               'chest':chest_circumference,
               'hpsToWaistBack':hps_to_waist_back,
               'hips':hips_circumference,

@@ -6,6 +6,10 @@ from paittern.selection.selection_pose import get_best_poses
 import os
 from dotenv import load_dotenv, find_dotenv
 import requests
+from tensorflow.keras.utils import CustomObjectScope
+import tensorflow as tf
+from paittern.contouring.predict import predict_mask
+
 
 
 '''API to obtain inputs from user (video, height and pattern desired) and predict
@@ -40,17 +44,22 @@ def predict(url,pattern,height=168):
     print(gif)
     keypoints_sequence, output_images= run_model_gif(gif)
     print('flag2 - run done')
-    # best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
 
-    # for img in best_poses_idx:
-    #     contour = get_contour(gif[img]) # a modifier, constitue la réalisation des contours de l'image
-    #     #draw_prediction_on_image(contour,keypoints_sequence[img])
-
-    # measures_pred = get_mensuration(best_poses_idx,pattern,height) # fonction romain
-
-
+    best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
+    print('flag3 - run done')
+    with CustomObjectScope():
+        model = tf.keras.models.load_model("./paittern/contouring/contouring_model")
+    print(model)
+    #countouring
+    print('flag4 - enter contour')
+    mask_list=[]
+    for idx in best_poses_idx:
+        mask = predict_mask(output_images[idx],model)
+        mask_list.append(mask)
+    print(mask_list)
     # translate height to desired unit
     # formating pattern type
+
 
 
 

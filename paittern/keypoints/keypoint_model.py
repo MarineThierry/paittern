@@ -39,7 +39,7 @@ def movenet(input_image,module):
     keypoints_with_scores = outputs['output_0'].numpy()
     return keypoints_with_scores
 
-def run_inference(movenet, image, crop_region, crop_size):
+def run_inference(movenet,module, image, crop_region, crop_size):
     """Runs model inferece on the cropped region.
 
     The function runs the model inference on the cropped region and updates the
@@ -49,7 +49,7 @@ def run_inference(movenet, image, crop_region, crop_size):
     input_image = crop_and_resize(
     tf.expand_dims(image, axis=0), crop_region, crop_size=crop_size)
       # Run model inference.
-    keypoints_with_scores = movenet(input_image)
+    keypoints_with_scores = movenet(input_image,module)
     # Update the coordinates.
     for idx in range(17):
         keypoints_with_scores[0, 0, idx, 0] = (
@@ -88,7 +88,7 @@ def run_model_gif(image):
 
 # code to run the model on each image
     for frame_idx in range(num_frames):
-        keypoints_with_scores = run_inference(movenet(module), image[frame_idx, :, :, :], crop_region,\
+        keypoints_with_scores = run_inference(movenet,module, image[frame_idx, :, :, :], crop_region,\
             crop_size=[input_size, input_size]) # run model for image
         output_images.append(draw_prediction_on_image(image[frame_idx, :, :, :].numpy().astype(np.int32),keypoints_with_scores, crop_region=None,close_figure=True, output_image_height=300)) # add image to image sequence
 

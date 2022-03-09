@@ -57,8 +57,7 @@ def predict(url,pattern,height=168):
         mask = predict_mask(output_images[idx],model)
         mask_list.append(mask)
     print(mask_list)
-    # translate height to desired unit
-    # formating pattern type
+
 
 
 

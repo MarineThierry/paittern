@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from paittern.keypoints.keypoint_model import run_model_gif
 from paittern.keypoints.video_gif import video_to_gif
 from paittern.selection.selection_pose import get_best_poses
+from paittern.measurements_1b import from_pix2measures
 import os
 from dotenv import load_dotenv, find_dotenv
 import requests
 from tensorflow.keras.utils import CustomObjectScope
 import tensorflow as tf
 from paittern.contouring.predict import predict_mask
+import numpy as np
 
 
 
@@ -43,6 +45,7 @@ def predict(url,pattern,height=168):
     print('flag1 - gif done')
     print(gif)
     keypoints_sequence, output_images= run_model_gif(gif)
+
     print('flag2 - run done')
 
     best_poses_idx=  get_best_poses(keypoints_sequence,output_images)
@@ -56,10 +59,19 @@ def predict(url,pattern,height=168):
     for idx in best_poses_idx:
         mask = predict_mask(output_images[idx],model)
         mask_list.append(mask)
-    print(mask_list)
+    print(len(mask_list))
+
+    # keypoints_sequence_squeezed = np.squeeze(keypoints_sequence)
+    # print(keypoints_sequence_squeezed.shape)
+    # measures = from_pix2measures(
+    #     pattern,
+    #     height,
+    #     keypoints_sequence_squeezed[best_poses_idx[0]],
+    #     # keypoints_sequence_squeezed[best_poses_idx[1]],
+    #     # keypoints_sequence_squeezed[best_poses_idx[2]],
+    #     mask_list[0])
+
+    # print('thanks god')
 
 
-
-
-
-    return {'working' :  'SUCCESS','mask_list':mask_list, 'best poses':best_poses_idx,'youy':'youy'}
+    return {'working' :  'SUCCESS'}

@@ -1,0 +1,4 @@
+steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['sleep', '600']
+timeout: 900s

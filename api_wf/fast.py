@@ -63,4 +63,4 @@ def predict(url,pattern,height=168):
 
 
 
-    return {'working' :  'SUCCESS'}
+    return {'working' :  'SUCCESS','mask_list':mask_list, 'best poses':best_poses_idx}
